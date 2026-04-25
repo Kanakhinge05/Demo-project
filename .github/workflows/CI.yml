@@ -29,7 +29,6 @@ jobs:
                   tags: |
                     ${{ secrets.DOCKER_USERNAME }}/portfolio:latest
                     ${{ secrets.DOCKER_USERNAME }}/portfolio:v1.${{ github.run_number }}
-
                     
 
         
