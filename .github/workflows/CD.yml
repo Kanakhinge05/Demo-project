@@ -13,7 +13,7 @@ jobs:
 
         steps:
             - name: Checkout code
-              uses: actions/checkout@v2
+              uses: actions/checkout@v2              
 
             - name: Deploy docker container to EC2
               uses: appleboy/ssh-action@v1.0.3
@@ -25,11 +25,6 @@ jobs:
                   timeout: 30s
                   command_timeout: 10m
                   script: |
-                    sudo yum update -y \
-                    sudo yum install docker -y \
-                    sudo systemctl start docker \
-                    sudo systemctl enable docker \
-                    sudo usermod -aG docker ec2-user \
                     docker rm -f portfolio || true
                     docker pull ${{ secrets.DOCKER_USERNAME }}/portfolio:latest
                     docker run -d \
