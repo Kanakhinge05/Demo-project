@@ -33,3 +33,5 @@ jobs:
               ${{ secrets.DOCKER_USERNAME }}/portfolio:latest
 
             docker image prune -f
+
+            
