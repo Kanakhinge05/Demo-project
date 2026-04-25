@@ -24,14 +24,12 @@ jobs:
                   port: 22
                   timeout: 30s
                   command_timeout: 10m
-               run: |
-                 sudo yum update -y \
-                 sudo yum install docker -y \
-                 sudo systemctl start docker \
-                 sudo systemctl enable docker \
-                 sudo usermod -aG docker ec2-user
-
                   script: |
+                    sudo yum update -y \
+                    sudo yum install docker -y \
+                    sudo systemctl start docker \
+                    sudo systemctl enable docker \
+                    sudo usermod -aG docker ec2-user \
                     docker rm -f portfolio || true
                     docker pull ${{ secrets.DOCKER_USERNAME }}/portfolio:latest
                     docker run -d \
@@ -61,4 +59,3 @@ jobs:
                 --delete \
                 --exclude ".git/*" \
                 --exclude ".github/*"
-                
