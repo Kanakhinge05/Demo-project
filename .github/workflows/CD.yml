@@ -54,11 +54,8 @@ jobs:
                   script: |
                     docker rm -f portfolio || true     #remove old container if exists
                     docker pull ${{ secrets.DOCKER_USERNAME }}/portfolio:latest   #pull latest image from docker hub
-                    docker run -d \    #run container in detached mode
-                      --name portfolio \
-                      -p 80:80 \
-                      ${{ secrets.DOCKER_USERNAME }}/portfolio:latest
-                      docker system prune -f    #clean up unused docker resources
+                    docker run -d -p 80:80 --name c1 ${{ secrets.DOCKER_USERNAME }}/portfolio:latest   #run new container
+                    docker system prune -f    #clean up unused docker resources
                     
     store-to-s3:
         needs: deploy-to-ec2
