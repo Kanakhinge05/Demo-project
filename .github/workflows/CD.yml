@@ -7,13 +7,40 @@ on:
             - completed
 
 jobs:
-    deploy-to-ec2:
+    Copy-script-and-run-on-ec2:
         if: ${{ github.event.workflow_run.conclusion == 'success' }}
         runs-on: ubuntu-latest
 
         steps:
             - name: Checkout code
-              uses: actions/checkout@v2              
+              uses: actions/checkout@v2
+              
+            - name: Copy script to EC2
+              uses: appleboy/scp-action@v0.1.7
+              with:
+                  host: ${{ secrets.EC2_HOST }}
+                  username: ${{ secrets.EC2_USER }}
+                  key: ${{ secrets.EC2_KEY }}
+                  source: "scripts/install-docker.sh"
+                  target: "/home/${{ secrets.EC2_USER }}/Demo-project/"
+
+            - name: Run script on EC2
+              uses: appleboy/ssh-action@v1.0.3
+              with:
+                  host: ${{ secrets.EC2_HOST }}
+                  username: ${{ secrets.EC2_USER }}
+                  key: ${{ secrets.EC2_KEY }}
+                  script: |
+                    cd Demo-project
+                    chmod +x install-docker.sh
+                    ./install-docker.sh
+
+    deploy-to-ec2:
+        needs: Copy-script-and-run-on-ec2
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v2
 
             - name: Deploy docker container to EC2
               uses: appleboy/ssh-action@v1.0.3
@@ -21,29 +48,15 @@ jobs:
                   host: ${{ secrets.EC2_HOST }}
                   username: ${{ secrets.EC2_USER }}
                   key: ${{ secrets.EC2_KEY }}
-                  port: 22
-                  timeout: 30s
-                  command_timeout: 10m
-
-            - name: Update
-              run: sudo apt-get update
-
-            - name: Give permission and run script to install docker
-              run: |
-                chmod +x scripts/install-docker.sh
-                ./scripts/install-docker.sh
-
-            - name: run docker container
-              run: |
-                docker rm -f portfolio || true
-                docker pull ${{ secrets.DOCKER_USERNAME }}/portfolio:latest
-                docker run -d \
-                --name portfolio \
-                    -p 8080:80 \
-                    --restart unless-stopped \
-                    ${{ secrets.DOCKER_USERNAME }}/portfolio:latest
-                    docker image prune -f
-
+                  script: |
+                    docker rm -f portfolio || true     #remove old container if exists
+                    docker pull ${{ secrets.DOCKER_USERNAME }}/portfolio:latest   #pull latest image from docker hub
+                    docker run -d \    #run container in detached mode
+                      --name portfolio \
+                      -p 3000:80 \
+                      ${{ secrets.DOCKER_USERNAME }}/portfolio:latest
+                      docker system prune -f    #clean up unused docker resources
+                    
     store-to-s3:
         needs: deploy-to-ec2
         runs-on: ubuntu-latest
