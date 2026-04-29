@@ -28,10 +28,13 @@ jobs:
             - name: Update
               run: sudo apt-get update
 
-            - name: install docker & run container
+            - name: Give permission and run script to install docker
               run: |
                 chmod +x scripts/install-docker.sh
                 ./scripts/install-docker.sh
+
+            - name: run docker container
+              run: |
                 docker rm -f portfolio || true
                 docker pull ${{ secrets.DOCKER_USERNAME }}/portfolio:latest
                 docker run -d \
