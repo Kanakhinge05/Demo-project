@@ -24,11 +24,18 @@ jobs:
                   port: 22
                   timeout: 30s
                   command_timeout: 10m
-                  script: |
-                    docker rm -f portfolio || true
-                    docker pull ${{ secrets.DOCKER_USERNAME }}/portfolio:latest
-                    docker run -d \
-                    --name portfolio \
+
+            - name: Update
+              run: sudo apt-get update
+
+            - name: install docker & run container
+              run: |
+                chmod +x scripts/install-docker.sh
+                ./scripts/install-docker.sh
+                docker rm -f portfolio || true
+                docker pull ${{ secrets.DOCKER_USERNAME }}/portfolio:latest
+                docker run -d \
+                --name portfolio \
                     -p 8080:80 \
                     --restart unless-stopped \
                     ${{ secrets.DOCKER_USERNAME }}/portfolio:latest
