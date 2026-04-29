@@ -14,9 +14,9 @@ jobs:
         steps:
             - name: Checkout code
               uses: actions/checkout@v2
-              
+
             - name: Create directory on EC2
-              run: mkdir -p /home/${{ secrets.EC2_USER }}/Demo-project
+              run: sudo mkdir -p /home/${{ secrets.EC2_USER }}/Demo-project
               
             - name: Copy script to EC2
               uses: appleboy/scp-action@v0.1.7
